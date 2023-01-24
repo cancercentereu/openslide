@@ -14,7 +14,6 @@ AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 
 # Checks for programs.
-AM_PROG_CC_C_O
 AC_PROG_CC
 
 # Largefile
@@ -62,7 +61,7 @@ PKG_CHECK_MODULES(LIBJPEG, [libjpeg], [], [
 
 PKG_CHECK_MODULES(OPENJPEG, [libopenjp2 >= 2.1.0])
 PKG_CHECK_MODULES(LIBTIFF, [libtiff-4])
-PKG_CHECK_MODULES(GLIB2, [glib-2.0 >= 2.56, gthread-2.0, gio-2.0, gobject-2.0])
+PKG_CHECK_MODULES(GLIB2, [glib-2.0 >= 2.56, gio-2.0, gobject-2.0])
 PKG_CHECK_MODULES(CAIRO, [cairo >= 1.2])
 PKG_CHECK_MODULES(LIBPNG, [libpng > 1.2])
 PKG_CHECK_MODULES(GDKPIXBUF, [gdk-pixbuf-2.0 >= 2.14])
@@ -76,6 +75,24 @@ PKG_CHECK_MODULES(VALGRIND, [valgrind], [
 ], [:])
 
 gl_VISIBILITY
+
+# glib only offers autoptr macros when the compiler supports them
+AC_MSG_CHECKING([compiler support for cleanup attribute])
+saved_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS $GLIB2_CFLAGS"
+AC_COMPILE_IFELSE([
+  AC_LANG_PROGRAM([
+    #include <glib.h>
+    #ifndef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+    #error Cleanup functions not available
+    #endif
+  ])
+], [
+  AC_MSG_RESULT([yes])
+], [
+  AC_MSG_FAILURE([glib2 reports compiler does not support cleanup attribute])
+])
+CFLAGS="$saved_CFLAGS"
 
 # CLOEXEC
 AC_MSG_CHECKING([fopen() close-on-exec flag])
@@ -122,37 +139,6 @@ AS_CASE([$host_os],
     ])
   ]
 )
-# Fallback: racily use fcntl()
-AC_CHECK_FUNCS([fcntl])
-
-# Windows _wfopen()
-AC_CHECK_FUNCS([_wfopen])
-
-# Mac OS X proc_pidfdinfo()
-AC_MSG_CHECKING([for proc_pidfdinfo])
-AC_LINK_IFELSE([
-  AC_LANG_PROGRAM(
-    [#include <libproc.h>],
-    [proc_pidfdinfo(0, 0, PROC_PIDFDKQUEUEINFO, NULL, 0)]
-  )
-], [
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([HAVE_PROC_PIDFDINFO], [1], [Define to 1 if you have the proc_pidfdinfo function.])
-], [
-  AC_MSG_RESULT([no])
-])
-
-# The test driver has special support for testing Windows builds from Cygwin
-AC_MSG_CHECKING([whether to cross-test from Cygwin])
-if test "$host_os" = "mingw32" -a "$build_os" = "cygwin"; then
-  AC_MSG_RESULT([yes])
-  CYGWIN_CROSS_TEST=yes
-else
-  AC_MSG_RESULT([no])
-  CYGWIN_CROSS_TEST=""
-fi
-AC_SUBST([CYGWIN_CROSS_TEST])
-AM_CONDITIONAL([CYGWIN_CROSS_TEST], [test -n "$CYGWIN_CROSS_TEST"])
 
 # gcc assumes Win32 stack frames are 16-byte-aligned by default, but the
 # Win32 ABI only requires 4-byte alignment.  If gcc emits aligned SSE
@@ -181,11 +167,12 @@ AS_CASE([$host],
   ]
 )
 
+# Path prefix for glib Valgrind suppressions
+PKG_CHECK_VAR(GLIB2_DATADIR, [gio-2.0], datadir)
+
 # Compiler warnings
 WARN_CFLAGS="-Wall -Wextra -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs"
 AC_SUBST([WARN_CFLAGS])
-# MinGW only
-gl_WARN_ADD([-Wno-pedantic-ms-format])
 
 AC_SUBST(AM_CFLAGS, ['$(WARN_CFLAGS) $(CFLAG_VISIBILITY) -DG_DISABLE_SINGLE_INCLUDES -DGLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_56 -DGLIB_VERSION_MAX_ALLOWED=GLIB_VERSION_MIN_REQUIRED -fno-common'])
 
