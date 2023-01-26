@@ -111,7 +111,7 @@ static void check_api_failures(openslide_t *osr) {
   CHECK_W_H(openslide_get_associated_image_dimensions(osr, "macro", &w, &h),
             -1, -1);
 
-  openslide_read_region(osr, NULL, 0, 0, 0, 0, 10, 10);
+  openslide_read_region(osr, NULL, 0, 0, 0, 10, 10);
   openslide_read_associated_image(osr, "label", NULL);
   openslide_read_associated_image(osr, "macro", NULL);
 }
@@ -163,7 +163,7 @@ static void check_regions(openslide_t *osr) {
     g_strfreev(args);
 
     uint32_t *buf = g_slice_alloc(w * h * 4);
-    openslide_read_region(osr, buf, x, y, 0, level, w, h);
+    openslide_read_region(osr, buf, x, y, level, w, h);
     check_error(osr);
     g_slice_free1(w * h * 4, buf);
   }

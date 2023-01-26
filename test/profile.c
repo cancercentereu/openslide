@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
 
   for (int yy = 0; yy < h; yy += BUFHEIGHT) {
     for (int xx = 0; xx < w; xx += BUFWIDTH) {
-      openslide_read_region(osr, buf, x + xx, y + yy, 0, level,
+      openslide_read_region(osr, buf, x + xx, y + yy, level,
                             MIN(BUFWIDTH, w - xx), MIN(BUFHEIGHT, h - yy));
     }
   }

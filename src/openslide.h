@@ -189,7 +189,6 @@ int32_t openslide_get_best_level_for_downsample(openslide_t *osr,
  * @param dest The destination buffer for the ARGB data.
  * @param x The top left x-coordinate, in the level 0 reference frame.
  * @param y The top left y-coordinate, in the level 0 reference frame.
- * @param plane Image plane to read (0 for brightfield; >= 0 for fluorescence).
  * @param level The desired level.
  * @param w The width of the region. Must be non-negative.
  * @param h The height of the region. Must be non-negative.
@@ -197,7 +196,7 @@ int32_t openslide_get_best_level_for_downsample(openslide_t *osr,
 OPENSLIDE_PUBLIC()
 void openslide_read_region(openslide_t *osr,
                            uint32_t *dest,
-                           int64_t x, int64_t y, int64_t plane,
+                           int64_t x, int64_t y,
                            int32_t level,
                            int64_t w, int64_t h);
 

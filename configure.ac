@@ -15,7 +15,6 @@ AC_CANONICAL_HOST
 
 # Checks for programs.
 AM_PROG_CC_C_O
-AC_PROG_CC_CC
 
 # Largefile
 AC_SYS_LARGEFILE

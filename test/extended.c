@@ -42,7 +42,7 @@ static void test_image_fetch(openslide_t *osr,
 			     int64_t w, int64_t h) {
   uint32_t *buf = g_new(uint32_t, w * h);
   for (int32_t level = 0; level < openslide_get_level_count(osr); level++) {
-    openslide_read_region(osr, buf, x, y, 0, level, w, h);
+    openslide_read_region(osr, buf, x, y, level, w, h);
   }
   g_free(buf);
 
@@ -118,7 +118,7 @@ static void check_cloexec_leaks(const char *slide, void *prog,
   GTimer *timer = g_timer_new();
   while (g_timer_elapsed(timer, NULL) < 2) {
     openslide_t *osr = openslide_open(slide);
-    openslide_read_region(osr, buf, x, y, 0, 0, 512, 512);
+    openslide_read_region(osr, buf, x, y, 0, 512, 512);
     openslide_close(osr);
   }
   g_timer_destroy(timer);
@@ -149,7 +149,7 @@ static void *cache_thread(void *data) {
   uint32_t *buf = g_malloc(4 * params->w * params->h);
   while (!g_atomic_int_get(params->stop)) {
     // read some tiles
-    openslide_read_region(params->osr[0], buf, 0, 0, 0, 0, params->w, params->h);
+    openslide_read_region(params->osr[0], buf, 0, 0, 0, params->w, params->h);
     // replace everyone's caches
     openslide_cache_t *cache = openslide_cache_create(params->cache_size);
     // redundantly set cache several times
@@ -274,10 +274,10 @@ int main(int argc, char **argv) {
   openslide_get_best_level_for_downsample(osr, 10000);
 
   // NULL buffer
-  openslide_read_region(osr, NULL, 0, 0, 0, 0, 1000, 1000);
+  openslide_read_region(osr, NULL, 0, 0, 0, 1000, 1000);
 
   // empty region
-  openslide_read_region(osr, NULL, 0, 0, 0, 0, 0, 0);
+  openslide_read_region(osr, NULL, 0, 0, 0, 0, 0);
 
   // read properties
   const char * const *property_names = openslide_get_property_names(osr);

@@ -80,7 +80,7 @@ static void render_tile(cairo_t *cr, const char *name, const char *path,
     error = g_strdup(openslide_get_error(osr));
     if (!error) {
       uint32_t *buf = g_slice_alloc(TILE_WIDTH * TILE_HEIGHT * 4);
-      openslide_read_region(osr, buf, x, y, 0, level, TILE_WIDTH, TILE_HEIGHT);
+      openslide_read_region(osr, buf, x, y, level, TILE_WIDTH, TILE_HEIGHT);
       error = g_strdup(openslide_get_error(osr));
       if (!error) {
         // draw background

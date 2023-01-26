@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
   for (int64_t i = 0; i < RUNS; i++) {
     for (int64_t y = 0; y < h; y += REGION_HEIGHT) {
       for (int64_t x = 0; x < w; x += REGION_WIDTH) {
-        openslide_read_region(osr, buf, x, y, 0,
+        openslide_read_region(osr, buf, x, y,
                               MIN(w - x, REGION_WIDTH),
                               MIN(h - y, REGION_HEIGHT));
       }

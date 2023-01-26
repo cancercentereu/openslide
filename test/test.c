@@ -146,7 +146,7 @@ static void test_image_fetch(openslide_t *osr,
     uint32_t *buf = malloc(num_bytes);
 
     printf("x: %"PRId64", y: %"PRId64", level: %d, w: %"PRId64", h: %"PRId64"\n", x, y, level, w, h);
-    openslide_read_region(osr, buf, x, y, 0, level, w, h);
+    openslide_read_region(osr, buf, x, y, level, w, h);
 
     // write as PPM
     if (!skip_write) {
@@ -298,11 +298,11 @@ int main(int argc, char **argv) {
   //  int64_t elapsed;
 
   // test NULL dest
-  openslide_read_region(osr, NULL, 0, 0, 0, 0, 1000, 1000);
+  openslide_read_region(osr, NULL, 0, 0, 0, 1000, 1000);
 
   // test empty dest
   uint32_t* item = 0;
-  openslide_read_region(osr, item, 0, 0, 0, 0, 0, 0);
+  openslide_read_region(osr, item, 0, 0, 0, 0, 0);
 
   /*
   // test empty surface

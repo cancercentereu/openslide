@@ -607,9 +607,10 @@ static bool ensure_nonnegative_dimensions(openslide_t *osr, int64_t w, int64_t h
 
 void openslide_read_region(openslide_t *osr,
 			   uint32_t *dest,
-			   int64_t x, int64_t y, int64_t channel,
+			   int64_t x, int64_t y,
 			   int32_t level,
 			   int64_t w, int64_t h) {
+  int64_t channel = 0;
   GError *tmp_err = NULL;
 
   if (!ensure_nonnegative_dimensions(osr, w, h)) {

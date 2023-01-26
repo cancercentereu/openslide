@@ -56,7 +56,7 @@ static void *thread_func(void *data) {
     if (tile == &sentinel) {
       break;
     }
-    openslide_read_region(state->osr, buf, tile->x, tile->y, 0, 0, TILE_SIZE,
+    openslide_read_region(state->osr, buf, tile->x, tile->y, 0, TILE_SIZE,
                           TILE_SIZE);
     g_async_queue_push(state->completions, tile);
   }
