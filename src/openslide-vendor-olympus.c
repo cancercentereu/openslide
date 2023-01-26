@@ -734,6 +734,9 @@ static bool read_ets_tile(openslide_t *osr,
 
   // TODO: Now we are keeping only the 1st channel!!
   struct tile *t = findtile(tiles, data->num_tiles, tile_col, tile_row, tile_channel, l->current_lvl);
+  if (t == NULL) {
+    return false;
+  }
   bool success = true;
 
   int32_t iw = l->image_width; // Tilew
