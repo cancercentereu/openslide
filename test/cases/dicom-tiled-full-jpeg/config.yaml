@@ -1,0 +1,11 @@
+base: DICOM/3DHISTECH-1.zip
+slide: 000004.dcm
+success: true
+vendor: dicom
+primary: true
+requires: [dicom]
+properties:
+  openslide.associated.label.icc-size: "63928"
+  openslide.associated.macro.icc-size: "63928"
+  openslide.icc-size: "63928"
+  openslide.vendor: dicom
