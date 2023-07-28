@@ -1523,6 +1523,7 @@ static bool olympus_open_vsi(openslide_t *osr, const char *filename,
       g_hash_table_remove(osr->properties, OPENSLIDE_PROPERTY_NAME_COMMENT);
       g_hash_table_remove(osr->properties, "tiff.ImageDescription");
 
+      /*
       // set MPP properties
       if (!_openslide_tiff_set_dir(tiff, 0, err)) {
         goto FAIL;
@@ -1530,7 +1531,7 @@ static bool olympus_open_vsi(openslide_t *osr, const char *filename,
       set_resolution_prop(osr, tiff, OPENSLIDE_PROPERTY_NAME_MPP_X,
                           TIFFTAG_XRESOLUTION);
       set_resolution_prop(osr, tiff, OPENSLIDE_PROPERTY_NAME_MPP_Y,
-                          TIFFTAG_YRESOLUTION);
+                          TIFFTAG_YRESOLUTION);*/
 
       if (!_openslide_tiff_add_associated_image(osr, "macro", tc,
                                                 1, err)) {
@@ -1636,6 +1637,7 @@ static bool olympus_open_vsi(openslide_t *osr, const char *filename,
   g_hash_table_remove(osr->properties, OPENSLIDE_PROPERTY_NAME_COMMENT);
   g_hash_table_remove(osr->properties, "tiff.ImageDescription");
 
+  /*
   // set MPP properties
   if (!_openslide_tiff_set_dir(tiff, 0, err)) {
     goto FAIL;
@@ -1649,6 +1651,7 @@ static bool olympus_open_vsi(openslide_t *osr, const char *filename,
                                             1, err)) {
     goto FAIL;
   }
+  */
 
   // verify slidedat ETS or TIFF exists
   char *slidedat_file = NULL;
