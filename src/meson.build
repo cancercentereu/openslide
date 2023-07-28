@@ -67,12 +67,13 @@ openslide_sources = [
   'openslide-vendor-hamamatsu.c',
   'openslide-vendor-leica.c',
   'openslide-vendor-mirax.c',
+  'openslide-vendor-olympus.c',
   'openslide-vendor-philips-tiff.c',
+  'openslide-vendor-precipoint.c',
   'openslide-vendor-sakura.c',
   'openslide-vendor-synthetic.c',
   'openslide-vendor-trestle.c',
   'openslide-vendor-ventana.c',
-  'openslide-vendor-precipoint.c',
 ]
 if dicom_dep.found()
   openslide_sources += [
