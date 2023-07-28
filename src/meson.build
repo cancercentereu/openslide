@@ -54,6 +54,7 @@ openslide_sources = [
   'openslide-decode-tiff.c',
   'openslide-decode-tifflike.c',
   'openslide-decode-xml.c',
+  'openslide-decode-zip.c',
   'openslide-error.c',
   'openslide-file.c',
   'openslide-grid.c',
@@ -71,6 +72,7 @@ openslide_sources = [
   'openslide-vendor-synthetic.c',
   'openslide-vendor-trestle.c',
   'openslide-vendor-ventana.c',
+  'openslide-vendor-precipoint.c',
 ]
 if dicom_dep.found()
   openslide_sources += [
@@ -99,6 +101,7 @@ libopenslide = library('openslide',
     png_dep,
     zlib_dep,
     libm_dep,
+    libzip_dep,
   ],
   install : true,
 )

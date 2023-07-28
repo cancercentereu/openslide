@@ -140,6 +140,7 @@ dicom_dep      = dependency(
   version : '>=0.5',
 )
 valgrind_dep   = dependency('valgrind', required : false)
+libzip_dep = dependency('libzip', version : '>=1.1')
 
 doxygen = find_program(
   'doxygen',
