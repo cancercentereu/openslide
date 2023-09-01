@@ -261,7 +261,9 @@ static enum slide_format _get_related_image_file(const char *filename, char **im
   g_free(dirname);
   g_free(slidedat_dir);
 
-  // WORK IN PROGRESS
+  char *best_file = NULL;
+  size_t best_file_size = 0;
+
 
   // list all files in directory
   GDir *dir;
@@ -273,18 +275,6 @@ static enum slide_format _get_related_image_file(const char *filename, char **im
     // check directory name
     if (strncmp(slide_dir, "stack1", 6) < 0)
       continue;
-
-    // DEBUG OPTIONS
-    /***********************************************************************/
-    //if (strncmp(slide_dir, "stack1", 6) == 0 && strlen(slide_dir) == 6)
-    //  continue;
-    //if (strncmp(slide_dir, "stack10000", 10) == 0)
-    //  continue;
-    //if (strncmp(slide_dir, "stack10002", 10) == 0)
-    //  continue;
-    /***********************************************************************/
-
-    printf("VSI stack used: %s\n", slide_dir);
 
     char *data_dir = g_build_filename(slidedat_path, slide_dir, NULL);
     char *current_file = NULL;
@@ -302,44 +292,49 @@ static enum slide_format _get_related_image_file(const char *filename, char **im
 
         bool is_valid = _openslide_fexists(current_file, err);
 
-        if (is_valid)
-          goto DONE;
+        if (is_valid) {
+          _openslide_file *current_file_ptr = _openslide_fopen(current_file, err);
+          if(current_file_ptr) {
+            // check file size
+            size_t current_file_size = _openslide_fsize(current_file_ptr, err);
+
+            if (current_file_size > best_file_size) {
+              best_file = current_file;
+              best_file_size = current_file_size;
+            } else {
+              g_free(current_file);
+            }
+            _openslide_fclose(current_file_ptr);
+          }
+        }
       }
-
-      // If there is more than 1 file or something goes wrong -> FAILED
-
-      g_free(slidedat_path);
-      g_set_error(err, OPENSLIDE_ERROR, OPENSLIDE_ERROR_FAILED,
-                  "Impossible to find related image file");
-      return SLIDE_FMT_UNKNOWN;
     }
+    g_free(data_dir);
+    g_dir_close(nested_dir);
+  }
 
+  g_dir_close(dir);
 
-DONE:
+  g_free(slidedat_path);
 
-    if (g_str_has_suffix(current_file, ETS_EXT)) {
+  printf("VSI stack used: %s\n", best_file);
 
-      *image_filename = current_file;
-      g_free(data_dir);
-      g_free(slidedat_path);
-      return SLIDE_FMT_ETS;
+  if (best_file && g_str_has_suffix(best_file, ETS_EXT)) {
+    *image_filename = best_file;
+    return SLIDE_FMT_ETS;
 
-    } else if (g_str_has_suffix(current_file, TIF_EXT)) {
+  } else if (best_file && g_str_has_suffix(best_file, TIF_EXT)) {
+    *image_filename = best_file;
+    g_free(best_file);
+    
+    return SLIDE_FMT_TIF;
 
-      *image_filename = current_file;
-      g_free(data_dir);
-      g_free(slidedat_path);
-      return SLIDE_FMT_TIF;
-
-    } else {
-
-      g_free(slidedat_path);
-      g_free(data_dir);
-      g_set_error(err, OPENSLIDE_ERROR, OPENSLIDE_ERROR_FAILED,
-                  "Impossible to find related image file");
-      return SLIDE_FMT_UNKNOWN;
-
-    }
+  } else {
+    g_free(slidedat_path);
+    g_free(best_file);
+    g_set_error(err, OPENSLIDE_ERROR, OPENSLIDE_ERROR_FAILED,
+                "Impossible to find related image file");
+    return SLIDE_FMT_UNKNOWN;
   }
 
   return SLIDE_FMT_UNKNOWN;
