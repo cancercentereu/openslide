@@ -528,19 +528,19 @@ static bool sis_header_read(struct sis_header * self, _openslide_file * stream, 
   check = _openslide_fread(stream, (char*)&self->etsnbytes, sizeof(self->etsnbytes));
   g_assert((self->etsnbytes == 228)); // size of ETS struct
   check = _openslide_fread(stream, (char*)&self->dummy0, sizeof(self->dummy0));
-  g_assert((self->dummy0 == 0)); // ??
+  //g_assert((self->dummy0 == 0)); // ??
   check = _openslide_fread(stream, (char*)&self->offsettiles, sizeof(self->offsettiles)); // offset to tiles
   check = _openslide_fread(stream, (char*)&self->ntiles, sizeof(self->ntiles)); // number of tiles
   check = _openslide_fread(stream, (char*)&self->dummy1, sizeof(self->dummy1)); // ??
-  g_assert((self->dummy1 == 0)); // always zero ?
+  //g_assert((self->dummy1 == 0)); // always zero ?
   check = _openslide_fread(stream, (char*)&self->dummy2, sizeof(self->dummy2)); // some kind of offset ?
   //g_assert((dummy2 == 0)); // not always
   check = _openslide_fread(stream, (char*)&self->dummy3, sizeof(self->dummy3));
-  g_assert((self->dummy3 == 0)); // always zero ?
+  //g_assert((self->dummy3 == 0)); // always zero ?
   check = _openslide_fread(stream, (char*)&self->dummy4, sizeof(self->dummy4));
   //g_assert((dummy4 == 0)); // not always
   check = _openslide_fread(stream, (char*)&self->dummy5, sizeof(self->dummy5));
-  g_assert((self->dummy5 == 0)); // always zero ?
+  //g_assert((self->dummy5 == 0)); // always zero ?
 
   return true;
 }
