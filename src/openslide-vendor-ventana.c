@@ -875,6 +875,7 @@ static bool ventana_open(openslide_t *osr, const char *filename,
         // large enough for all the pixels
         double x, y, w, h;
         _openslide_grid_get_bounds(l->grid, &x, &y, &w, &h);
+        printf("area: %ld %g %g %g %g\n", level, x, y, w, h);
         l->base.w = ceil(x + w);
         l->base.h = ceil(y + h);
         // clear tile size hints set by _openslide_tiff_level_init()
