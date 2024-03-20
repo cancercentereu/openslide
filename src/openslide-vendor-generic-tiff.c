@@ -85,6 +85,18 @@ static bool read_tile(openslide_t *osr,
                                             level, tile_col, tile_row,
                                             &cache_entry);
   if (!tiledata) {
+    // TIFF doesn't allow missing tiles, but WSI-derived TIFFs might have them
+    bool is_missing;
+    if (!_openslide_tiff_check_missing_tile(tiffl, tiff,
+                                            tile_col, tile_row,
+                                            &is_missing, err)) {
+      return false;
+    }
+    if (is_missing) {
+      // nothing to draw
+      return true;
+    }
+
     g_autofree uint32_t *buf = g_malloc(tw * th * 4);
     if (!_openslide_tiff_read_tile(tiffl, tiff,
                                    buf, tile_col, tile_row,
@@ -224,8 +236,7 @@ static bool generic_tiff_open(openslide_t *osr,
     // verify that we can read this compression (hard fail if not)
     uint16_t compression;
     if (!TIFFGetField(ct.tiff, TIFFTAG_COMPRESSION, &compression)) {
-      g_set_error(err, OPENSLIDE_ERROR, OPENSLIDE_ERROR_FAILED,
-                  "Can't read compression scheme");
+      _openslide_tiff_error(err, ct.tiff, "Can't read compression scheme");
       return false;
     };
     if (!TIFFIsCODECConfigured(compression)) {
@@ -266,6 +277,7 @@ static bool generic_tiff_open(openslide_t *osr,
                                                     err)) {
     return false;
   }
+  _openslide_tifflike_set_resolution_props(osr, tl, 0);
 
   // get icc profile size, if present
   struct level *base_level = level_array->pdata[0];

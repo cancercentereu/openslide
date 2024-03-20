@@ -23,7 +23,7 @@ executable(
 )
 executable(
   'profile', 'profile.c',
-  dependencies : [test_deps, valgrind_dep],
+  dependencies : test_deps,
 )
 executable(
   'query', 'query.c',
@@ -35,7 +35,7 @@ test_synth = executable(
 )
 executable(
   'try_open', 'try_open.c',
-  dependencies : [test_deps, valgrind_dep],
+  dependencies : test_deps,
   c_args : ['-Wno-deprecated-declarations'],
 )
 

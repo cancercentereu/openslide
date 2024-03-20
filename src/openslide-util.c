@@ -40,6 +40,8 @@ static const struct debug_option {
   enum _openslide_debug_flag flag;
   const char *desc;
 } debug_options[] = {
+  {"decoding", OPENSLIDE_DEBUG_DECODING,
+   "log warnings from format decoding libraries"},
   {"detection", OPENSLIDE_DEBUG_DETECTION, "log format detection errors"},
   {"jpeg-markers", OPENSLIDE_DEBUG_JPEG_MARKERS,
    "verify Hamamatsu restart markers"},
@@ -170,7 +172,25 @@ void *_openslide_inflate_buffer(const void *src, int64_t src_len,
   return g_steal_pointer(&dst);
 }
 
-#undef g_ascii_strtod
+int64_t _openslide_compute_seek(int64_t initial, int64_t length,
+                                int64_t offset, int whence) {
+  int64_t result = initial;
+  switch (whence) {
+  case SEEK_SET:
+    result = offset;
+    break;
+  case SEEK_CUR:
+    result += offset;
+    break;
+  case SEEK_END:
+    result = length + offset;
+    break;
+  default:
+    g_assert_not_reached();
+  }
+  return result;
+}
+
 double _openslide_parse_double(const char *value) {
   // Canonicalize comma to decimal point, since the locale of the
   // originating system sometimes leaks into slide files.
@@ -180,14 +200,13 @@ double _openslide_parse_double(const char *value) {
 
   char *endptr;
   errno = 0;
-  double result = g_ascii_strtod(canonical, &endptr);
+  double result = g_ascii_strtod(canonical, &endptr);  // ci-allow
   // fail on overflow/underflow
   if (canonical[0] == 0 || endptr[0] != 0 || errno == ERANGE) {
     return NAN;
   }
   return result;
 }
-#define g_ascii_strtod _OPENSLIDE_POISON(_openslide_parse_double)
 
 char *_openslide_format_double(double d) {
   char buf[G_ASCII_DTOSTR_BUF_SIZE];

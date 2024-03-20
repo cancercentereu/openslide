@@ -32,6 +32,7 @@
 #include <config.h>
 
 #include "openslide-private.h"
+#include "openslide-decode-dicom.h"
 #include "openslide-decode-gdkpixbuf.h"
 #include "openslide-decode-jp2k.h"
 #include "openslide-decode-jpeg.h"
@@ -44,10 +45,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <tiffio.h>
-
-#ifdef HAVE_LIBDICOM
-#include "openslide-decode-dicom.h"
-#endif
 
 #define IMAGE_PIXELS 16
 #define IMAGE_BUFSIZE (4 * IMAGE_PIXELS * IMAGE_PIXELS)
@@ -76,7 +73,6 @@ static bool decode_bmp(const void *data, uint32_t len,
                                             IMAGE_PIXELS, IMAGE_PIXELS, err);
 }
 
-#ifdef HAVE_LIBDICOM
 static bool decode_dicom(const void *data, uint32_t len,
                          uint32_t *dest, GError **err) {
   DcmError *dcm_error = NULL;
@@ -139,7 +135,6 @@ static bool decode_dicom(const void *data, uint32_t len,
                                        dcm_frame_get_length(frame),
                                        dest, w, h, err);
 }
-#endif
 
 static bool decode_j2k(const void *data, uint32_t len,
                         uint32_t *dest, GError **err) {
@@ -182,20 +177,7 @@ static tsize_t mem_tiff_write(thandle_t th G_GNUC_UNUSED,
 
 static toff_t mem_tiff_seek(thandle_t th, toff_t offset, int whence) {
   struct mem_tiff *mem = th;
-
-  switch (whence) {
-  case SEEK_SET:
-    mem->offset = offset;
-    break;
-  case SEEK_CUR:
-    mem->offset += offset;
-    break;
-  case SEEK_END:
-    mem->offset = mem->size + offset;
-    break;
-  default:
-    g_assert_not_reached();
-  }
+  mem->offset = _openslide_compute_seek(mem->offset, mem->size, offset, whence);
   return mem->offset;
 }
 
@@ -209,7 +191,6 @@ static toff_t mem_tiff_size(thandle_t th) {
   return mem->size;
 }
 
-#undef TIFFClientOpen
 static bool decode_tiff(const void *data, uint32_t len,
                         uint32_t *dest, GError **err) {
   // there's no reason for OpenSlide as a whole to support reading entire
@@ -221,8 +202,9 @@ static bool decode_tiff(const void *data, uint32_t len,
   };
   // mode: m disables mmap to avoid sigbus and other mmap fragility
   g_autoptr(TIFF) tiff =
-    TIFFClientOpen("tiff", "rm", &mem, mem_tiff_read, mem_tiff_write,
-                   mem_tiff_seek, mem_tiff_close, mem_tiff_size, NULL, NULL);
+    TIFFClientOpen("tiff", "rm", &mem, mem_tiff_read,  // ci-allow
+                   mem_tiff_write, mem_tiff_seek, mem_tiff_close,
+                   mem_tiff_size, NULL, NULL);
   if (tiff == NULL) {
     g_set_error(err, OPENSLIDE_ERROR, OPENSLIDE_ERROR_FAILED,
                 "Couldn't open TIFF");
@@ -243,7 +225,6 @@ static bool decode_tiff(const void *data, uint32_t len,
 
   return _openslide_tiff_read_tile(&tiffl, tiff, dest, 0, 0, err);
 }
-#define TIFFClientOpen _OPENSLIDE_POISON(_openslide_tiffcache_get)
 
 static bool decode_xml(const void *data, uint32_t len,
                        uint32_t *dest, GError **err) {
@@ -477,7 +458,6 @@ static const struct synthetic_item **synthetic_items = (const struct synthetic_i
        0x07, 0xec, 0xa8, 0x70, 0xb8, 0xcb, 0x03, 0x00, 0x5d, 0x29, 0xd1, 0x3c,
     }
   },
-#ifdef HAVE_LIBDICOM
   &(const struct synthetic_item){
     .name = "dicom.jpeg",
     .description = "YCbCr JPEG DICOM",
@@ -539,7 +519,6 @@ static const struct synthetic_item **synthetic_items = (const struct synthetic_i
        0x6f, 0xed, 0x55, 0xb3, 0x98,
     }
   },
-#endif
   &(const struct synthetic_item){
     .name = "j2k",
     .description = "J2K",

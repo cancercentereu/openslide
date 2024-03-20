@@ -315,20 +315,6 @@ static int dimension_compare(const void *a, const void *b) {
   }
 }
 
-static void set_resolution_prop(openslide_t *osr, TIFF *tiff,
-                                const char *property_name,
-                                ttag_t tag) {
-  float f;
-  uint16_t unit;
-
-  if (TIFFGetFieldDefaulted(tiff, TIFFTAG_RESOLUTIONUNIT, &unit) &&
-      TIFFGetField(tiff, tag, &f) &&
-      unit == RESUNIT_CENTIMETER) {
-    g_hash_table_insert(osr->properties, g_strdup(property_name),
-                        _openslide_format_double(10000.0 / f));
-  }
-}
-
 static void set_region_bounds_props(openslide_t *osr,
                                     struct level *level0) {
   int64_t x0 = INT64_MAX;
@@ -669,8 +655,7 @@ static bool create_levels_from_collection(openslide_t *osr,
       // verify that we can read this compression (hard fail if not)
       uint16_t compression;
       if (!TIFFGetField(tiff, TIFFTAG_COMPRESSION, &compression)) {
-        g_set_error(err, OPENSLIDE_ERROR, OPENSLIDE_ERROR_FAILED,
-                    "Can't read compression scheme");
+        _openslide_tiff_error(err, tiff, "Can't read compression scheme");
         return false;
       }
       if (!TIFFIsCODECConfigured(compression)) {
@@ -781,8 +766,7 @@ static bool leica_open(openslide_t *osr, const char *filename,
   // get the xml description
   char *image_desc;
   if (!TIFFGetField(ct.tiff, TIFFTAG_IMAGEDESCRIPTION, &image_desc)) {
-    g_set_error(err, OPENSLIDE_ERROR, OPENSLIDE_ERROR_FAILED,
-                "Couldn't read ImageDescription");
+    _openslide_tiff_error(err, ct.tiff, "Couldn't read ImageDescription");
     return false;
   }
 
@@ -819,13 +803,7 @@ static bool leica_open(openslide_t *osr, const char *filename,
   g_hash_table_remove(osr->properties, "tiff.ImageDescription");
 
   // set MPP properties
-  if (!_openslide_tiff_set_dir(ct.tiff, property_dir, err)) {
-    return false;
-  }
-  set_resolution_prop(osr, ct.tiff, OPENSLIDE_PROPERTY_NAME_MPP_X,
-                      TIFFTAG_XRESOLUTION);
-  set_resolution_prop(osr, ct.tiff, OPENSLIDE_PROPERTY_NAME_MPP_Y,
-                      TIFFTAG_YRESOLUTION);
+  _openslide_tifflike_set_resolution_props(osr, tl, property_dir);
 
   // set region bounds properties
   set_region_bounds_props(osr, level0);

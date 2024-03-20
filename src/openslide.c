@@ -35,16 +35,14 @@
 
 #include "openslide-error.h"
 
-const char _openslide_release_info[] = "OpenSlide " SUFFIXED_VERSION ", copyright (C) 2007-2023 Carnegie Mellon University and others.\nLicensed under the GNU Lesser General Public License, version 2.1.";
+const char _openslide_release_info[] = "OpenSlide " SUFFIXED_VERSION ", copyright (C) 2007-2024 Carnegie Mellon University and others.\nLicensed under the GNU Lesser General Public License, version 2.1.";
 
 static const char * const EMPTY_STRING_ARRAY[] = { NULL };
 
 static const struct _openslide_format *formats[] = {
   &_openslide_format_synthetic,
   &_openslide_format_mirax,
-#ifdef HAVE_LIBDICOM
   &_openslide_format_dicom,
-#endif
   &_openslide_format_hamamatsu_vms_vmu,
   &_openslide_format_hamamatsu_ndpi,
   &_openslide_format_sakura,

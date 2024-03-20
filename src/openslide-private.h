@@ -162,6 +162,11 @@ void *_openslide_inflate_buffer(const void *src, int64_t src_len,
                                 int64_t dst_len,
                                 GError **err);
 
+/* Compute the new offset after seeking a file with the specified initial
+   offset and length. */
+int64_t _openslide_compute_seek(int64_t initial, int64_t length,
+                                int64_t offset, int whence);
+
 /* Parse string to double, returning NAN on failure.  Accept both comma
    and period as decimal separator. */
 double _openslide_parse_double(const char *value);
@@ -346,6 +351,7 @@ bool _openslide_check_cairo_status(cairo_t *cr, GError **err);
 
 /* Debug flags */
 enum _openslide_debug_flag {
+  OPENSLIDE_DEBUG_DECODING,
   OPENSLIDE_DEBUG_DETECTION,
   OPENSLIDE_DEBUG_JPEG_MARKERS,
   OPENSLIDE_DEBUG_PERFORMANCE,
@@ -388,31 +394,9 @@ extern const int32_t _openslide_G_Cb[256];
 extern const int32_t _openslide_G_Cr[256];
 extern const int16_t _openslide_B_Cb[256];
 
-/* Prevent use of dangerous functions and functions with mandatory wrappers.
-   Every @p replacement must be unique to avoid conflicting-type errors. */
-#define _OPENSLIDE_POISON(replacement) error__use_ ## replacement ## _instead
-#define fopen _OPENSLIDE_POISON(_openslide_fopen)
-#define fread _OPENSLIDE_POISON(_openslide_fread)
-#define fseek _OPENSLIDE_POISON(_openslide_fseek)
-#define ftell _OPENSLIDE_POISON(_openslide_ftell)
-#define fclose _OPENSLIDE_POISON(_openslide_fclose)
-#define g_file_test _OPENSLIDE_POISON(_openslide_fexists)
-#define strtod _OPENSLIDE_POISON(_openslide_parse_double)
-#define g_ascii_strtod _OPENSLIDE_POISON(_openslide_parse_double_)
-#define sqlite3_open _OPENSLIDE_POISON(_openslide_sqlite_open)
-#define sqlite3_open_v2 _OPENSLIDE_POISON(_openslide_sqlite_open_)
-#define sqlite3_close _OPENSLIDE_POISON(_openslide_sqlite_close)
-#define TIFFClientOpen _OPENSLIDE_POISON(_openslide_tiffcache_get)
-#define TIFFFdOpen _OPENSLIDE_POISON(_openslide_tiffcache_get_)
-#define TIFFOpen _OPENSLIDE_POISON(_openslide_tiffcache_get__)
-#define TIFFSetDirectory _OPENSLIDE_POISON(_openslide_tiff_set_dir)
-
-#ifndef NO_POISON_FSEEKO
-// openslide-file.c needs the original macros
-#undef fseeko
-#undef ftello
-#define fseeko _OPENSLIDE_POISON(_openslide_fseek_)
-#define ftello _OPENSLIDE_POISON(_openslide_ftell_)
+#ifdef _WIN32
+// Prevent windows.h from defining the IN/OUT macro
+#define _NO_W32_PSEUDO_MODIFIERS
 #endif
 
 #endif
