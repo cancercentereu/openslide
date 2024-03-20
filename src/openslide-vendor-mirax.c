@@ -42,7 +42,11 @@
 #include "openslide-hash.h"
 
 static const char MRXS_EXT[] = ".mrxs";
-static const char SLIDEDAT_INI[] = "Slidedat.ini";
+static const char *SLIDEDAT_INI[] = {
+  "Slidedat.ini",
+  "slidedat.ini",
+  "SLIDEDAT.INI"
+};
 static const int SLIDEDAT_MAX_SIZE = 1 << 20;
 
 static const char GROUP_GENERAL[] = "GENERAL";
@@ -364,6 +368,20 @@ static const struct _openslide_ops mirax_ops = {
   .destroy = destroy,
 };
 
+static char* get_slidedat_ini_path(const char *dirname, GError **err) {
+  for (unsigned i = 0; i < G_N_ELEMENTS(SLIDEDAT_INI); i++) {
+    char *path = g_build_filename(dirname, SLIDEDAT_INI[i], NULL);
+    if (_openslide_fexists(path, err)) {
+      return path;
+    }
+    g_free(path);
+    if (err != NULL && *err != NULL) {
+      break;
+    }
+  }
+  return NULL;
+}
+
 static bool mirax_detect(const char *filename, struct _openslide_tifflike *tl,
                          GError **err) {
   // reject TIFFs
@@ -395,16 +413,13 @@ static bool mirax_detect(const char *filename, struct _openslide_tifflike *tl,
   // verify slidedat exists
   g_autofree char *dirname =
     g_strndup(filename, strlen(filename) - strlen(MRXS_EXT));
-  g_autofree char *slidedat_path =
-    g_build_filename(dirname, SLIDEDAT_INI, NULL);
-  if (!_openslide_fexists(slidedat_path, &tmp_err)) {
-    if (tmp_err != NULL) {
-      g_propagate_prefixed_error(err, tmp_err, "Testing whether %s exists: ",
-                                 SLIDEDAT_INI);
-    } else {
-      g_set_error(err, OPENSLIDE_ERROR, OPENSLIDE_ERROR_FAILED,
-                  "%s does not exist", SLIDEDAT_INI);
-    }
+  g_autofree char *slidedat_path = get_slidedat_ini_path(dirname, &tmp_err);
+  if (slidedat_path == NULL) {
+    return false;
+  }
+  
+  if (tmp_err != NULL) {
+    g_propagate_prefixed_error(err, tmp_err, "Testing whether slidedat.ini exists: ");
     return false;
   }
 
@@ -1377,8 +1392,9 @@ static bool mirax_open(openslide_t *osr, const char *filename,
     g_strndup(filename, strlen(filename) - strlen(MRXS_EXT));
 
   // first, check slidedat
+  
   g_autofree char *slidedat_path =
-    g_build_filename(dirname, SLIDEDAT_INI, NULL);
+    get_slidedat_ini_path(dirname, err);
   // hash the slidedat
   if (!_openslide_hash_file(quickhash1, slidedat_path, err)) {
     return false;
