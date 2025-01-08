@@ -272,8 +272,8 @@ static enum slide_format _get_related_image_file(const char *filename, char **im
   dir = g_dir_open(slidedat_path, 0, err);
   while ((slide_dir = g_dir_read_name(dir))) {
 
-    // check directory name
-    if (strncmp(slide_dir, "stack1", 6) < 0)
+    // check directory name - if doesn't start from stack1 or is exactly stack1, skip
+    if (strncmp(slide_dir, "stack1", 6) < 0 || strlen(slide_dir) == 6)
       continue;
 
     char *data_dir = g_build_filename(slidedat_path, slide_dir, NULL);
