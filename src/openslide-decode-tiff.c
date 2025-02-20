@@ -409,8 +409,6 @@ static bool _get_associated_image_data(TIFF *tiff,
   uint16_t samples_per_pixel, extra_samples, *sample_info;
   if (TIFFGetField(tiff, TIFFTAG_SAMPLESPERPIXEL, &samples_per_pixel) &&
       TIFFGetField(tiff, TIFFTAG_EXTRASAMPLES, &extra_samples, &sample_info)) {
-    fprintf(stderr, "samples_per_pixel: %d\n", samples_per_pixel);
-    fprintf(stderr, "extra_samples: %d\n", extra_samples);
     if (samples_per_pixel == 3 &&
         extra_samples > 0) {
       TIFFSetField(tiff, TIFFTAG_EXTRASAMPLES, 0);
