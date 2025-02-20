@@ -515,70 +515,81 @@ static bool olympus_vsi_detect(const char *filename G_GNUC_UNUSED,
 
 static bool sis_header_read(struct sis_header * self, _openslide_file * stream, GError **err) {
   int check G_GNUC_UNUSED = 0;
-  check = _openslide_fread(stream, self->magic, sizeof(self->magic));
+  check = _openslide_fread(stream, self->magic, sizeof(self->magic), err);
   g_assert((strncmp(self->magic, SIS_MAGIC, 4) == 0));
-  check = _openslide_fread(stream, (char*)&self->headerSize, sizeof(self->headerSize));
+  check = _openslide_fread(stream, (char*)&self->headerSize, sizeof(self->headerSize), err);
   g_assert((self->headerSize == 64)); // size of struct
-  check = _openslide_fread(stream, (char*)&self->version, sizeof(self->version));
+  check = _openslide_fread(stream, (char*)&self->version, sizeof(self->version), err);
   //g_assert((self->version == 2)); // version ??
-  check = _openslide_fread(stream, (char*)&self->Ndim, sizeof(self->Ndim));
+  check = _openslide_fread(stream, (char*)&self->Ndim, sizeof(self->Ndim), err);
   g_assert(((self->Ndim == 4) || (self->Ndim == 6))); // dim ?
-  check = _openslide_fread(stream, (char*)&self->etsoffset, sizeof(self->etsoffset));
+  check = _openslide_fread(stream, (char*)&self->etsoffset, sizeof(self->etsoffset), err);
   g_assert((self->etsoffset == 64)); // offset of ETS struct
-  check = _openslide_fread(stream, (char*)&self->etsnbytes, sizeof(self->etsnbytes));
+  check = _openslide_fread(stream, (char*)&self->etsnbytes, sizeof(self->etsnbytes), err);
   g_assert((self->etsnbytes == 228)); // size of ETS struct
-  check = _openslide_fread(stream, (char*)&self->dummy0, sizeof(self->dummy0));
+  check = _openslide_fread(stream, (char*)&self->dummy0, sizeof(self->dummy0), err);
   //g_assert((self->dummy0 == 0)); // ??
-  check = _openslide_fread(stream, (char*)&self->offsettiles, sizeof(self->offsettiles)); // offset to tiles
-  check = _openslide_fread(stream, (char*)&self->ntiles, sizeof(self->ntiles)); // number of tiles
-  check = _openslide_fread(stream, (char*)&self->dummy1, sizeof(self->dummy1)); // ??
+  check = _openslide_fread(stream, (char*)&self->offsettiles, sizeof(self->offsettiles), err); // offset to tiles
+  check = _openslide_fread(stream, (char*)&self->ntiles, sizeof(self->ntiles), err); // number of tiles
+  check = _openslide_fread(stream, (char*)&self->dummy1, sizeof(self->dummy1), err); // ??
   //g_assert((self->dummy1 == 0)); // always zero ?
-  check = _openslide_fread(stream, (char*)&self->dummy2, sizeof(self->dummy2)); // some kind of offset ?
+  check = _openslide_fread(stream, (char*)&self->dummy2, sizeof(self->dummy2), err); // some kind of offset ?
   //g_assert((dummy2 == 0)); // not always
-  check = _openslide_fread(stream, (char*)&self->dummy3, sizeof(self->dummy3));
+  check = _openslide_fread(stream, (char*)&self->dummy3, sizeof(self->dummy3), err);
   //g_assert((self->dummy3 == 0)); // always zero ?
-  check = _openslide_fread(stream, (char*)&self->dummy4, sizeof(self->dummy4));
+  check = _openslide_fread(stream, (char*)&self->dummy4, sizeof(self->dummy4), err);
   //g_assert((dummy4 == 0)); // not always
-  check = _openslide_fread(stream, (char*)&self->dummy5, sizeof(self->dummy5));
+  check = _openslide_fread(stream, (char*)&self->dummy5, sizeof(self->dummy5), err);
   //g_assert((self->dummy5 == 0)); // always zero ?
+
+  if (*err) {
+    return false;
+  }
 
   return true;
 }
 
 static bool ets_header_read(struct ets_header * self, _openslide_file * stream, GError **err) {
   int check G_GNUC_UNUSED = 0;
-  check = _openslide_fread(stream, self->magic, sizeof(self->magic));
+  check = _openslide_fread(stream, self->magic, sizeof(self->magic), err);
   g_assert((strncmp(self->magic, ETS_MAGIC, 4) == 0));
-  check = _openslide_fread(stream, (char*)&self->version, sizeof(self->version));
+  check = _openslide_fread(stream, (char*)&self->version, sizeof(self->version), err);
   //g_assert((self->version == 0x30001 || self->version == 0x30003)); // some kind of version ?
-  check = _openslide_fread(stream, (char*)&self->pixelType, sizeof(self->pixelType));
+  check = _openslide_fread(stream, (char*)&self->pixelType, sizeof(self->pixelType), err);
   g_assert(((self->pixelType == PIXEL_TYPE_UINT8) || (self->pixelType == PIXEL_TYPE_INT32) /* when sis_header->dim == 4 */));
-  check = _openslide_fread(stream, (char*)&self->sizeC, sizeof(self->sizeC));
+  check = _openslide_fread(stream, (char*)&self->sizeC, sizeof(self->sizeC), err);
   g_assert(((self->sizeC == CHANNEL_GRAYSCALE) || (self->sizeC == CHANNEL_RGB)));
-  check = _openslide_fread(stream, (char*)&self->colorspace, sizeof(self->colorspace));
+  check = _openslide_fread(stream, (char*)&self->colorspace, sizeof(self->colorspace), err);
   g_assert(((self->colorspace == COLORSPACE_BRIGHTFIELD) || (self->colorspace == COLORSPACE_FLUORESCENCE)));
-  check = _openslide_fread(stream, (char*)&self->compression, sizeof(self->compression)); // codec
+  check = _openslide_fread(stream, (char*)&self->compression, sizeof(self->compression), err); // codec
   g_assert(((self->compression == FORMAT_JPEG) || (self->compression == FORMAT_JP2)));
-  check = _openslide_fread(stream, (char*)&self->quality, sizeof(self->quality));
+  check = _openslide_fread(stream, (char*)&self->quality, sizeof(self->quality), err);
   //g_assert( self->quality == 90 || self->quality == 100 ); // some kind of JPEG quality ?
-  check = _openslide_fread(stream, (char*)&self->dimx, sizeof(self->dimx));
+  check = _openslide_fread(stream, (char*)&self->dimx, sizeof(self->dimx), err);
   //g_assert((self->dimx == 512)); // always tile of 512x512 ?
-  check = _openslide_fread(stream, (char*)&self->dimy, sizeof(self->dimy));
+  check = _openslide_fread(stream, (char*)&self->dimy, sizeof(self->dimy), err);
   //g_assert((self->dimy == 512)); //
-  check = _openslide_fread(stream, (char*)&self->dimz, sizeof(self->dimz));
+  check = _openslide_fread(stream, (char*)&self->dimz, sizeof(self->dimz), err);
   g_assert((self->dimz == 1) ); // dimz ?
+
+  if (*err) {
+    return false;
+  }
 
   self->backgroundColor[0] = 0;
   self->backgroundColor[1] = 0;
   self->backgroundColor[2] = 0;
 
   uint32_t skip_bytes[17];
-  check = _openslide_fread(stream, skip_bytes, sizeof(skip_bytes));
+  check = _openslide_fread(stream, skip_bytes, sizeof(skip_bytes), err);
+  if (*err) {
+    return false;
+  }
 
   if (self->pixelType == PIXEL_TYPE_UINT8) {
 
     uint8_t *backgroundColor = (uint8_t*)malloc(sizeof(uint8_t) * self->sizeC);
-    check = _openslide_fread(stream, backgroundColor, sizeof(uint8_t) * self->sizeC);
+    check = _openslide_fread(stream, backgroundColor, sizeof(uint8_t) * self->sizeC, err);
 
     for (int i = 0; i < (int)self->sizeC; ++i) {
       self->backgroundColor[i] = (uint8_t)(backgroundColor[i]);
@@ -589,7 +600,7 @@ static bool ets_header_read(struct ets_header * self, _openslide_file * stream, 
   } else if (self->pixelType == PIXEL_TYPE_INT32) {
 
     int32_t *backgroundColor = (int32_t*)malloc(sizeof(int32_t) * self->sizeC);
-    check = _openslide_fread(stream, backgroundColor, sizeof(int32_t) * self->sizeC);
+    check = _openslide_fread(stream, backgroundColor, sizeof(int32_t) * self->sizeC, err);
 
     for (int i = 0; i < (int)self->sizeC; ++i) {
       self->backgroundColor[i] = (uint8_t)(backgroundColor[i]);
@@ -598,18 +609,26 @@ static bool ets_header_read(struct ets_header * self, _openslide_file * stream, 
     free(backgroundColor);
   }
 
+  if (*err) {
+    return false;
+  }
+
   uint32_t *skip_bytes2 = (uint32_t*)malloc(sizeof(uint32_t) * (10 - self->sizeC));
-  check = _openslide_fread(stream, skip_bytes2, sizeof(uint32_t) * (10 - self->sizeC)); // background color
+  check = _openslide_fread(stream, skip_bytes2, sizeof(uint32_t) * (10 - self->sizeC), err); // background color
 
   uint32_t skip_bytes3;
-  check = _openslide_fread(stream, (char*)&skip_bytes3, sizeof(skip_bytes3)); // component order
+  check = _openslide_fread(stream, (char*)&skip_bytes3, sizeof(skip_bytes3), err); // component order
 
   int32_t usePyramid = 0;
-  check = _openslide_fread(stream, (char*)&usePyramid, sizeof(usePyramid)); // use pyramid
+  check = _openslide_fread(stream, (char*)&usePyramid, sizeof(usePyramid), err); // use pyramid
 
   self->usePyramid = usePyramid != 0;
 
   free(skip_bytes2);
+
+  if (*err) {
+    return false;
+  }
 
   return true;
 }
@@ -617,12 +636,12 @@ static bool ets_header_read(struct ets_header * self, _openslide_file * stream, 
 static void tile_read(struct tile * self, _openslide_file * stream) {
   int check G_GNUC_UNUSED = 0;
 
-  check = _openslide_fread(stream, (char*)&self->dummy1, sizeof(self->dummy1));
-  check = _openslide_fread(stream, (char*)self->coord, sizeof(self->coord));
-  check = _openslide_fread(stream, (char*)&self->level, sizeof(self->level));
-  check = _openslide_fread(stream, (char*)&self->offset, sizeof(self->offset));
-  check = _openslide_fread(stream, (char*)&self->numbytes, sizeof(self->numbytes));
-  check = _openslide_fread(stream, (char*)&self->dummy2, sizeof(self->dummy2));
+  check = _openslide_fread(stream, (char*)&self->dummy1, sizeof(self->dummy1), NULL);
+  check = _openslide_fread(stream, (char*)self->coord, sizeof(self->coord), NULL);
+  check = _openslide_fread(stream, (char*)&self->level, sizeof(self->level), NULL);
+  check = _openslide_fread(stream, (char*)&self->offset, sizeof(self->offset), NULL);
+  check = _openslide_fread(stream, (char*)&self->numbytes, sizeof(self->numbytes), NULL);
+  check = _openslide_fread(stream, (char*)&self->dummy2, sizeof(self->dummy2), NULL);
 }
 
 static struct tile *findtile(struct tile *tiles, uint32_t ntiles, uint32_t x, uint32_t y, uint32_t channel, uint32_t lvl) {
@@ -664,8 +683,8 @@ static uint32_t *read_ets_image(openslide_t *osr,
   int32_t buflen = t->numbytes / sizeof(uint8_t);
 
   void * buffer = g_slice_alloc(buflen);
-  int32_t check = _openslide_fread(f, buffer, t->numbytes);
-  if (!check)
+  int32_t check = _openslide_fread(f, buffer, t->numbytes, err);
+  if (*err || !check)
     goto FAIL;
 
   switch (format) {
@@ -1529,7 +1548,7 @@ static bool olympus_open_vsi(openslide_t *osr, const char *filename,
                           TIFFTAG_YRESOLUTION);*/
 
       if (!_openslide_tiff_add_associated_image(osr, "macro", tc,
-                                                1, err)) {
+                                                1, NULL, err)) {
         goto FAIL;
       }
 
@@ -1588,7 +1607,7 @@ static bool olympus_open_vsi(openslide_t *osr, const char *filename,
                           TIFFTAG_YRESOLUTION);
 
       if (!_openslide_tiff_add_associated_image(osr, "macro", tc,
-                                                1, err)) {
+                                                1, NULL, err)) {
         goto FAIL;
       }
 

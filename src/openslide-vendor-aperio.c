@@ -551,7 +551,6 @@ static bool aperio_open(openslide_t *osr,
             name = (dir == 1) ? "thumbnail" : NULL;
         } 
       }
-      const char *name = NULL;
       g_autofree tdir_t *icc_dir = NULL;
       if (g_str_equal(name, "thumbnail")) {
         g_autoptr(GHashTable) thumbnail_props = read_properties(ct.tiff, err);
