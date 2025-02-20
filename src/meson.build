@@ -1,6 +1,7 @@
 # generate openslide-tables.c
 make_tables = executable(
-  'make-tables', 'make-tables.c',
+  'make-tables',
+  'make-tables.c',
   dependencies : [libm_native_dep],
   native : true,
 )
@@ -31,10 +32,7 @@ else
 endif
 
 # Public headers
-openslide_headers = files(
-  'openslide.h',
-  'openslide-features.h',
-)
+openslide_headers = files('openslide-features.h', 'openslide.h')
 include_subdir = 'openslide'
 install_headers(
   openslide_headers,
@@ -76,12 +74,13 @@ openslide_sources = [
   'openslide-vendor-synthetic.c',
   'openslide-vendor-trestle.c',
   'openslide-vendor-ventana.c',
+  'openslide-vendor-zeiss.c',
 ]
-libopenslide = library('openslide',
+libopenslide = library(
+  'openslide',
   openslide_sources,
   version : soversion,
   c_args : ['-D_OPENSLIDE_BUILDING_DLL', '-DG_LOG_DOMAIN="OpenSlide"'],
-  link_args : libopenslide_link_args,
   gnu_symbol_visibility : visibility,
   include_directories : config_h_include,
   dependencies : [
@@ -98,6 +97,7 @@ libopenslide = library('openslide',
     jpeg_dep,
     png_dep,
     zlib_dep,
+    zstd_dep,
     libm_dep,
     libzip_dep,
   ],

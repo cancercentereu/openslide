@@ -43,9 +43,7 @@ void _openslide_propagate_error(openslide_t *osr, GError *err) {
 }
 
 // internal error propagation
-GQuark _openslide_error_quark(void) {
-  return g_quark_from_string("openslide-error-quark");
-}
+G_DEFINE_QUARK(openslide-error-quark, _openslide_error)
 
 void _openslide_io_error(GError **err, const char *fmt, ...) {
   int my_errno = errno;

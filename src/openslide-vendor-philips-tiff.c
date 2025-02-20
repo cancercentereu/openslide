@@ -431,11 +431,11 @@ static uint32_t parse_objective_power(const char *derivation, GError **err) {
     }
     if (g_str_equal(kv[0], "levels") && kv[1]) {
       g_auto(GStrv) levels = g_strsplit(kv[1], ",", 0);
-      char *end;
-      uint64_t first_level = g_ascii_strtoull(levels[0], &end, 10);
+      uint64_t first_level;
       // the first entry might be the objective power, or might be a number
       // above 10000.  accept only reasonable-looking values.
-      if (first_level && !*end && first_level <= 200) {
+      if (_openslide_parse_uint64(levels[0], &first_level, 10) &&
+          first_level && first_level <= 200) {
         return first_level;
       }
       break;
@@ -635,7 +635,8 @@ static bool philips_tiff_open(openslide_t *osr,
                g_str_has_prefix(image_desc, LABEL_DESCRIPTION)) {
       // label
       //g_debug("Adding label image from directory %d", dir);
-      if (!_openslide_tiff_add_associated_image(osr, "label", tc, dir, err)) {
+      if (!_openslide_tiff_add_associated_image(osr, "label", tc, dir, NULL,
+                                                err)) {
         return false;
       }
 
@@ -643,7 +644,8 @@ static bool philips_tiff_open(openslide_t *osr,
                g_str_has_prefix(image_desc, MACRO_DESCRIPTION)) {
       // macro image
       //g_debug("Adding macro image from directory %d", dir);
-      if (!_openslide_tiff_add_associated_image(osr, "macro", tc, dir, err)) {
+      if (!_openslide_tiff_add_associated_image(osr, "macro", tc, dir, NULL,
+                                                err)) {
         return false;
       }
     }
