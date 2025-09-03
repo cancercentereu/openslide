@@ -38,7 +38,7 @@
 
 #include "openslide-private.h"
 #include "openslide-decode-xml.h"
-#include "openslide-hash.h"
+
 #include "openslide-decode-jpeg.h"
 //#include "openslide-decode-png.h"
 #include "openslide-decode-zip.h"

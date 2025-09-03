@@ -21,11 +21,11 @@
 
 #pragma once
 
+#include <glib.h>
+
 #include "openslide.h"
-#include "openslide-hash.h"
 #include "openslide-error.h"
 
-#include <glib.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <inttypes.h>

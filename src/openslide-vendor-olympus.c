@@ -38,7 +38,7 @@
 #include "openslide-decode-xml.h"
 #include "openslide-decode-tiff.h"
 #include "openslide-decode-tifflike.h"
-#include "openslide-decode-gdkpixbuf.h"
+
 
 #include <png.h>
 #include <glib.h>
@@ -47,7 +47,7 @@
 #include <math.h>
 #include <tiffio.h>
 #include <setjmp.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
+
 
 static const char ETS_EXT[] = ".ets";
 static const char TIF_EXT[] = ".tif";
@@ -158,7 +158,6 @@ struct tile {
 struct load_state {
   int32_t w;
   int32_t h;
-  GdkPixbuf *pixbuf;  // NULL until validated, then a borrowed ref
   GError *err;
 };
 
